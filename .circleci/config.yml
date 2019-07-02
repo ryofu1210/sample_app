@@ -15,8 +15,8 @@ executors:
         environment:
           BUNDLE_PATH: vendor/bundle
           RAILS_ENV: test
-      - image: circleci/mysql:8.0
-        command: mysqld --default-authentication-plugin=mysql_native_password
+      - image: circleci/mysql:5.7
+        # command: mysqld --default-authentication-plugin=mysql_native_password
         environment:
           MYSQL_ALLOW_EMPTY_PASSWORD: true
           MYSQL_ROOT_PASSWORD: ''
@@ -72,9 +72,15 @@ jobs:
           command: |
             dockerize -wait \
             tcp://127.0.0.1:3306 -timeout 120s
+      # - run:
+      #     name: データベースセットアップ
+      #     command: bin/rails db:schema:load --trace
       - run:
           name: データベースセットアップ
-          command: bin/rails db:schema:load --trace
+          command: bin/rails db:create
+      - run:
+          name: データベースセットアップ
+          command: bin/rails db:migrate
       - run:
           name: Rspecの実行
           command: bundle exec rspec
