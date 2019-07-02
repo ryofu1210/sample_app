@@ -9,6 +9,21 @@ executors:
           BUNDLE_PATH: vendor/bundle
           RAILS_ENV: test
     working_directory: ~/repo
+  with_db:
+    docker:
+      - image: circleci/ruby:2.3.3
+        environment:
+          BUNDLE_PATH: vendor/bundle
+          RAILS_ENV: test
+      - image: circleci/mysql:8.0
+        command: mysqld --default-authentication-plugin=mysql_native_password
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_DATABASE: wdb-circleci-rails_test
+    working_directory: ~/repo
+
+
 
 jobs:
   checkout_code:
@@ -33,6 +48,35 @@ jobs:
           key: v1-bundle-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
+  # test_rubocop:
+  #   executor: default
+  #   steps:
+  #     - restore_cache:
+  #       key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+  #     - restore_cache:
+  #       key: v1-bundle-{{ checksum "Gemfile.lock" }}
+  #     - run:
+  #       name: RuboCop
+  #       command: bundle exec rubocop
+  
+  test_rspec:
+    executor: with_db
+    steps:
+      - restore_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache:
+          key: v1-bundle-{{ checksum "Gemfile.lock" }}
+      - run:
+          name: データベースの起動待機
+          command: |
+            dockerize -wait \
+            tcp://127.0.0.1:3306 -timeout 120s
+      - run:
+          name: データベースセットアップ
+          command: bin/rails db:schema:load --trace
+      - run:
+          name: Rspecの実行
+          command: bundle exec rspec
 
 workflows:
   version: 2
@@ -42,4 +86,7 @@ workflows:
       - bundle_dependencies:
           requires:
             - checkout_code
+      - test_rspec:
+          requires:
+            - bundle_dependencies
 
