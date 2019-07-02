@@ -1,7 +1,45 @@
-version: 2
-jobs:
-  build:
+version: 2.1
+executors:
+  default:
     docker:
       - image: circleci/ruby:2.3.3
+        environment:
+          BUNDLE_JOBS: 3
+          BUNDLE_RETRY: 3
+          BUNDLE_PATH: vendor/bundle
+          RAILS_ENV: test
+    working_directory: ~/repo
+
+jobs:
+  checkout_code:
+    executor: default
     steps:
-      - run: echo "hello world"
+      - checkout
+      - save_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ~/repo
+  bundle_dependencies:
+    executor: default
+    steps:
+      - restore_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache:
+          key: v1-bundle-{{ checksum "Gemfile.lock" }}
+      - run:
+          name: Bundle Install
+          command: bundle check || bundle install
+      - save_cache:
+          key: v1-bundle-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - checkout_code
+      - bundle_dependencies:
+          requires:
+            - checkout_code
+
