@@ -20,7 +20,8 @@ executors:
         environment:
           MYSQL_ALLOW_EMPTY_PASSWORD: true
           MYSQL_ROOT_PASSWORD: ''
-          MYSQL_DATABASE: wdb-circleci-rails_test
+          # MYSQL_DATABASE: wdb-circleci-rails_test
+          MYSQL_DATABASE: sample_app_test
     working_directory: ~/repo
 
 
