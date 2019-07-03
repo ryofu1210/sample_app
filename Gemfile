@@ -51,7 +51,6 @@ gem 'rails-i18n', '~> 5.1'
 gem 'fog-aws'
 # .env から環境変数を読み込み
 gem 'dotenv-rails', require: 'dotenv/rails-now'
-gem 'mini_racer'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
