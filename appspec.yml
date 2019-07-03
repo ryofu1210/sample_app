@@ -2,4 +2,4 @@ version: 0.0
 os: linux
 files:
   - source: ./
-    destination: /var/www/rails
+    destination: /var/www/rails/sample_app
