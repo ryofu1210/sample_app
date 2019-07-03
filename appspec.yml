@@ -3,3 +3,8 @@ os: linux
 files:
   - source: ./
     destination: /var/www/rails/sample_app
+hooks:
+  AfterInstall:
+    - location: scripts/bundle_install.sh
+      timeout: 300
+      runas: root

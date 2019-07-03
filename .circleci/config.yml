@@ -119,6 +119,8 @@ workflows:
           requires:
             - bundle_dependencies
       - deploy:
+          requires:
+            - test_rspec
           filters:
             branches:
               only: master
